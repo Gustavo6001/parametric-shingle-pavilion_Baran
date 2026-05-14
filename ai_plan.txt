@@ -1,0 +1,48 @@
+Student Name:
+Baran Koç
+
+AI PLAN
+
+PROJECT:
+Parametric Shingle Pavilion Generator
+
+GOAL:
+The goal is to create a simple parametric system that generates a curved pavilion with repeated shingle panels.
+
+PLAN:
+
+1. Start by defining the design goal.
+   The project will generate a pavilion using parameters instead of manual modeling.
+
+2. Write detailed pseudo-code.
+   The pseudo-code explains the logic before writing the real code.
+
+3. Define the main input parameters.
+   These parameters control the pavilion span, height, length, shingle size, row count, column count, row offset, and support height.
+
+4. Create a base arc.
+   The pavilion starts from three points: left point, top point, and right point.
+
+5. Generate the pavilion surface.
+   The arc is extruded in one direction to create a curved roof surface.
+
+6. Divide the surface into a grid.
+   The grid creates points where shingles will be placed.
+
+7. Apply a staggered row logic.
+   Every second row is offset to create a shingle pattern.
+
+8. Create repeated shingle panels.
+   A rectangle is created at every grid point.
+
+9. Add support height.
+   The shingles are lifted slightly above the base surface.
+
+10. Organize the code in Visual Studio Code.
+    The code will be saved in a Python file called main.py.
+
+11. Save all project files.
+    The repository will include pseudo_code.txt, ai_plan.txt, main.py, README.md, and requirements.txt.
+
+12. Push the project to GitHub.
+    GitHub Desktop will be used to create a repository, commit the files, and publish the project online.

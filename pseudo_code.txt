@@ -1,0 +1,75 @@
+Student Name:
+Baran Koç
+
+PROJECT TITLE:
+
+Parametric Shingle Pavilion Generator
+
+GOAL:
+Create a parametric geometry system that generates a curved pavilion surface and places repeated shingle panels on top of it.
+
+INPUT PARAMETERS:
+- pavilion_span
+- pavilion_height
+- pavilion_length
+- row_count
+- column_count
+- shingle_width
+- shingle_height
+- row_offset
+- support_height
+
+PSEUDO CODE:
+
+START
+
+1. Define the pavilion dimensions:
+   - span
+   - height
+   - length
+
+2. Define the shingle system:
+   - number of rows
+   - number of columns
+   - shingle width
+   - shingle height
+   - row offset
+   - support height
+
+3. Create a curved base shape:
+   - Create a left point
+   - Create a top point
+   - Create a right point
+   - Use these points to make an arc
+
+4. Create the pavilion surface:
+   - Extrude the arc in the length direction
+   - This creates the curved roof surface
+
+5. Divide the surface:
+   - Divide the surface into rows
+   - Divide the surface into columns
+   - Create placement points for shingles
+
+6. Create a staggered pattern:
+   - For every row, check if the row is even or odd
+   - If the row is odd, move the points slightly to the side
+   - This creates a brick-like shingle pattern
+
+7. Create shingle panels:
+   - For every point on the surface
+   - Create one rectangular shingle panel
+   - Place the shingle at that point
+
+8. Lift the shingles:
+   - Move each shingle away from the surface
+   - Use the support height value
+
+9. Create supports:
+   - For every shingle
+   - Create a small support from the base surface to the shingle
+
+10. Output the result:
+   - Show the curved pavilion
+   - Show the shingles
+   - Show the supports
