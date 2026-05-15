@@ -1,138 +1,279 @@
-"""
-Parametric Shingle Pavilion Generator
+# Student Name: Baran Koç
+# Project: Parametric Curved Shingle Pavilion
 
-This is a beginner-friendly Python script that represents
-the logic of a parametric Grasshopper-style pavilion.
-"""
+import Rhino.Geometry as rg
+import math
 
-# -----------------------------
-# Input Parameters
-# -----------------------------
+# ==========================================
+# INPUT TYPE CONVERSION
+# ==========================================
 
-pavilion_span = 10.0
-pavilion_height = 4.0
-pavilion_length = 16.0
+Height = float(Height)
+Base_width = float(Base_width)
+depth = float(depth)
+curvature_points = float(curvature_points)
 
-row_count = 12
-column_count = 20
+rows = int(rows)
+columns = int(columns)
 
-shingle_width = 0.8
-shingle_height = 0.5
-row_offset = 0.5
-support_height = 0.2
+panel_width = float(panel_width)
+panel_height = float(panel_height)
+panel_thickness = float(panel_thickness)
+panel_curvature = float(panel_curvature)
+panel_rotation = float(panel_rotation)
 
+min_rotation = float(min_rotation)
+max_rotation = float(max_rotation)
 
-# -----------------------------
-# Functions
-# -----------------------------
+min_offset = float(min_offset)
+max_offset = float(max_offset)
 
-def create_base_arc(span, height):
-    left_point = (-span / 2, 0, 0)
-    top_point = (0, 0, height)
-    right_point = (span / 2, 0, 0)
+frame_thickness = float(frame_thickness)
+rib_spacing = float(rib_spacing)
+purlin_spacing = float(purlin_spacing)
 
-    arc_points = [left_point, top_point, right_point]
+if attractor_point is None:
+    attractor_point = rg.Point3d(0, depth / 2.0, Height / 2.0)
 
-    return arc_points
+# ==========================================
+# OUTPUT CONTAINERS
+# ==========================================
 
+uv_grid = []
+surface_frames = []
+ribs = []
+purlins = []
+repeated_panels = []
+attractor_rotation = []
+final_pavilion = []
 
-def generate_grid(span, height, length, rows, columns):
-    grid = []
+section_curve = None
+mirrored_curve = None
+main_surface = None
+single_panel = None
 
-    for row in range(rows):
-        row_points = []
+# ==========================================
+# CREATE BASE PROFILE CURVES
+# ==========================================
 
-        for column in range(columns):
-            x = -span / 2 + (span / (columns - 1)) * column
-            y = -length / 2 + (length / (rows - 1)) * row
+pts_left = []
+pts_right = []
 
-            normalized_x = abs(x) / (span / 2)
-            z = height * (1 - normalized_x ** 2)
+for i in range(rows + 1):
+    t = float(i) / rows
 
-            row_points.append((x, y, z))
+    z = t * Height
+    curve_factor = math.sin(t * math.pi) * curvature_points * Base_width
 
-        grid.append(row_points)
+    x_left = -Base_width / 2.0 + curve_factor
+    x_right = Base_width / 2.0 - curve_factor
 
-    return grid
+    pts_left.append(rg.Point3d(x_left, 0, z))
+    pts_right.append(rg.Point3d(x_right, 0, z))
 
+section_curve = rg.Curve.CreateInterpolatedCurve(pts_left, 3)
+mirrored_curve = rg.Curve.CreateInterpolatedCurve(pts_right, 3)
 
-def apply_row_offset(grid, offset_value, shingle_width):
-    offset_grid = []
+# ==========================================
+# CREATE MAIN SURFACE
+# ==========================================
 
-    for row_index, row in enumerate(grid):
-        new_row = []
+loft = rg.Brep.CreateFromLoft(
+    [section_curve, mirrored_curve],
+    rg.Point3d.Unset,
+    rg.Point3d.Unset,
+    rg.LoftType.Normal,
+    False
+)
 
-        for point in row:
-            x, y, z = point
+if loft and len(loft) > 0:
+    main_surface = loft[0]
 
-            if row_index % 2 == 1:
-                x = x + offset_value * shingle_width
+# ==========================================
+# DIVIDE SURFACE
+# ==========================================
 
-            new_row.append((x, y, z))
+if main_surface:
+    face = main_surface.Faces[0]
 
-        offset_grid.append(new_row)
+    u_domain = face.Domain(0)
+    v_domain = face.Domain(1)
 
-    return offset_grid
+    for i in range(rows):
+        for j in range(columns):
 
+            u = u_domain.ParameterAt(float(i) / max(rows - 1, 1))
+            v = v_domain.ParameterAt(float(j) / max(columns - 1, 1))
 
-def create_shingle(center_point, width, height, support_height):
-    x, y, z = center_point
+            pt = face.PointAt(u, v)
+            normal = face.NormalAt(u, v)
+            normal.Unitize()
 
-    lifted_z = z + support_height
+            plane = rg.Plane(pt, normal)
 
-    shingle = {
-        "center": (x, y, lifted_z),
-        "width": width,
-        "height": height
-    }
+            uv_grid.append(pt)
+            surface_frames.append(plane)
 
-    return shingle
+# ==========================================
+# CREATE RIBS
+# ==========================================
 
+rib_count = max(2, int(depth / rib_spacing) + 1)
 
-def generate_pavilion():
-    arc = create_base_arc(pavilion_span, pavilion_height)
+for r in range(rib_count):
+    y = float(r) / (rib_count - 1) * depth
 
-    grid = generate_grid(
-        pavilion_span,
-        pavilion_height,
-        pavilion_length,
-        row_count,
-        column_count
+    for crv in [section_curve, mirrored_curve]:
+        c = crv.DuplicateCurve()
+        c.Transform(rg.Transform.Translation(0, y, 0))
+
+        pipe = rg.Brep.CreatePipe(
+            c,
+            frame_thickness,
+            False,
+            rg.PipeCapMode.Flat,
+            True,
+            0.01,
+            0.01
+        )
+
+        if pipe:
+            ribs.extend(pipe)
+
+# ==========================================
+# CREATE PURLINS
+# ==========================================
+
+purlin_count = max(2, int(Height / purlin_spacing) + 1)
+
+for i in range(purlin_count):
+    t = float(i) / (purlin_count - 1)
+
+    z = t * Height
+    curve_factor = math.sin(t * math.pi) * curvature_points * Base_width
+
+    x_left = -Base_width / 2.0 + curve_factor
+    x_right = Base_width / 2.0 - curve_factor
+
+    start_pt = rg.Point3d(x_left, 0, z)
+    end_pt = rg.Point3d(x_right, depth, z)
+
+    line = rg.Line(start_pt, end_pt)
+
+    pipe = rg.Brep.CreatePipe(
+        line.ToNurbsCurve(),
+        frame_thickness * 0.6,
+        False,
+        rg.PipeCapMode.Flat,
+        True,
+        0.01,
+        0.01
     )
 
-    offset_grid = apply_row_offset(
-        grid,
-        row_offset,
-        shingle_width
+    if pipe:
+        purlins.extend(pipe)
+
+# ==========================================
+# CREATE PANEL FUNCTION
+# ==========================================
+
+def create_panel(base_plane, rotation_value, offset_value):
+    plane = rg.Plane(base_plane)
+
+    # Move panel outward along surface normal
+    plane.Origin += plane.ZAxis * offset_value
+
+    # Create rectangular panel
+    rect = rg.Rectangle3d(
+        plane,
+        rg.Interval(-panel_width / 2.0, panel_width / 2.0),
+        rg.Interval(-panel_height / 2.0, panel_height / 2.0)
     )
 
-    shingles = []
+    # Create planar Brep
+    breps = rg.Brep.CreatePlanarBreps(rect.ToNurbsCurve())
 
-    for row in offset_grid:
-        for point in row:
-            shingle = create_shingle(
-                point,
-                shingle_width,
-                shingle_height,
-                support_height
-            )
+    if not breps or len(breps) == 0:
+        return None
 
-            shingles.append(shingle)
+    brep = breps[0]
 
-    return arc, offset_grid, shingles
+    # Rotate panel
+    center = plane.Origin
 
+    rot = rg.Transform.Rotation(
+        math.radians(rotation_value),
+        plane.XAxis,
+        center
+    )
 
-# -----------------------------
-# Run the Program
-# -----------------------------
+    brep.Transform(rot)
 
-arc, grid, shingles = generate_pavilion()
+    return brep
 
-print("Parametric Shingle Pavilion Generated")
-print("------------------------------------")
-print("Pavilion span:", pavilion_span)
-print("Pavilion height:", pavilion_height)
-print("Pavilion length:", pavilion_length)
-print("Rows:", row_count)
-print("Columns:", column_count)
-print("Total shingles:", len(shingles))
+# ==========================================
+# ATTRACTOR + PANEL DISTRIBUTION
+# ==========================================
+
+max_distance = math.sqrt(
+    Base_width ** 2 +
+    depth ** 2 +
+    Height ** 2
+)
+
+for index, plane in enumerate(surface_frames):
+
+    pt = plane.Origin
+    distance = pt.DistanceTo(attractor_point)
+
+    factor = 1.0 - min(distance / max_distance, 1.0)
+
+    rotation_value = (
+        min_rotation +
+        factor * (max_rotation - min_rotation)
+    )
+
+    offset_value = (
+        min_offset +
+        factor * (max_offset - min_offset)
+    )
+
+    row = index // columns
+
+    local_plane = rg.Plane(plane)
+
+    # Shift every second row
+    if row % 2 == 1:
+        local_plane.Origin += local_plane.XAxis * (panel_width * 0.5)
+
+    panel = create_panel(
+        local_plane,
+        rotation_value,
+        offset_value
+    )
+
+    if panel:
+        repeated_panels.append(panel)
+        attractor_rotation.append(rotation_value)
+
+# ==========================================
+# SINGLE PANEL OUTPUT
+# ==========================================
+
+if surface_frames:
+    single_panel = create_panel(
+        surface_frames[0],
+        panel_rotation,
+        min_offset
+    )
+
+# ==========================================
+# FINAL ASSEMBLY
+# ==========================================
+
+if main_surface:
+    final_pavilion.append(main_surface)
+
+final_pavilion.extend(ribs)
+final_pavilion.extend(purlins)
+final_pavilion.extend(repeated_panels)

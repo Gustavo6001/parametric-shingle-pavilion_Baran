@@ -2,74 +2,120 @@ Student Name:
 Baran Koç
 
 PROJECT TITLE:
-
-Parametric Shingle Pavilion Generator
+Parametric Curved Shingle Pavilion
 
 GOAL:
-Create a parametric geometry system that generates a curved pavilion surface and places repeated shingle panels on top of it.
+Create a parametric curved pavilion covered with repeated shingle panels. The pavilion should be controlled using sliders in Grasshopper and generated with Python.
 
 INPUT PARAMETERS:
-- pavilion_span
+- pavilion_width
 - pavilion_height
-- pavilion_length
+- pavilion_depth
+- curvature_amount
 - row_count
 - column_count
 - shingle_width
 - shingle_height
-- row_offset
+- overlap_amount
+- tilt_angle
 - support_height
+- base_width
+- base_depth
+- base_thickness
 
 PSEUDO CODE:
 
 START
 
-1. Define the pavilion dimensions:
-   - span
+1. Define global pavilion parameters:
+   - width
    - height
-   - length
+   - depth
+   - curvature amount
 
-2. Define the shingle system:
+2. Define grid parameters:
    - number of rows
    - number of columns
+
+3. Define shingle parameters:
    - shingle width
    - shingle height
-   - row offset
+   - overlap amount
+   - tilt angle
    - support height
 
-3. Create a curved base shape:
-   - Create a left point
-   - Create a top point
-   - Create a right point
-   - Use these points to make an arc
+4. Define base parameters:
+   - base width
+   - base depth
+   - base thickness
 
-4. Create the pavilion surface:
-   - Extrude the arc in the length direction
-   - This creates the curved roof surface
+5. Create a curved vertical pavilion surface:
+   - Use width as the horizontal direction
+   - Use height as the vertical direction
+   - Use depth and curvature amount to bend the surface
+   - The surface leans backward and curves softly
 
-5. Divide the surface:
-   - Divide the surface into rows
-   - Divide the surface into columns
-   - Create placement points for shingles
+6. Create a local frame system:
+   - For each point on the surface
+   - Calculate the local X direction
+   - Calculate the local Z direction
+   - Calculate the surface normal direction
 
-6. Create a staggered pattern:
-   - For every row, check if the row is even or odd
-   - If the row is odd, move the points slightly to the side
-   - This creates a brick-like shingle pattern
+7. Divide the surface into a grid:
+   - Rows control the vertical subdivision
+   - Columns control the horizontal subdivision
+   - Each grid cell becomes a location for one shingle
 
-7. Create shingle panels:
-   - For every point on the surface
-   - Create one rectangular shingle panel
-   - Place the shingle at that point
+8. Apply fish-scale row offset:
+   - If the row index is even, keep the original position
+   - If the row index is odd, shift the shingle by half the horizontal spacing
+   - This creates a staggered scale pattern
 
-8. Lift the shingles:
-   - Move each shingle away from the surface
-   - Use the support height value
+9. Create shingle panels:
+   - For each grid location
+   - Create one rectangular or slightly tapered panel
+   - Place the panel on the local surface frame
+   - Move it outward from the surface using the normal direction
 
-9. Create supports:
-   - For every shingle
-   - Create a small support from the base surface to the shingle
+10. Apply shingle tilt:
+   - Rotate or move the upper part of the shingle outward
+   - Use the tilt angle parameter
+   - This creates depth and shadow between shingles
 
-10. Output the result:
-   - Show the curved pavilion
-   - Show the shingles
-   - Show the supports
+11. Create support spacers:
+   - For each shingle
+   - Create a support line or spacer from the surface to the shingle
+   - Use support height as the distance
+
+12. Create vertical structural ribs:
+   - Generate vertical curves along the pavilion surface
+   - These ribs define the main structural frame
+
+13. Create horizontal purlins:
+   - Generate horizontal curves across the pavilion surface
+   - These connect the ribs and support the shingles
+
+14. Create side frames:
+   - Add structural lines on the left and right edges
+   - These stabilize the pavilion form
+
+15. Create base platform:
+   - Create a rectangular platform under the pavilion
+   - Use base width, base depth, and base thickness
+   - Align the pavilion with the platform
+
+16. Output geometry:
+   - Output shingles
+   - Output supports
+   - Output ribs
+   - Output purlins
+   - Output base
+
+17. Output a text report:
+   - Student name
+   - Project title
+   - Number of rows
+   - Number of columns
+   - Total shingles generated
+
+END

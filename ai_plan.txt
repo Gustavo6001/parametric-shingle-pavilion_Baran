@@ -1,48 +1,54 @@
 Student Name:
 Baran Koç
 
-AI PLAN
+AI DEVELOPMENT PLAN
 
 PROJECT:
-Parametric Shingle Pavilion Generator
+Parametric Curved Shingle Pavilion
 
-GOAL:
-The goal is to create a simple parametric system that generates a curved pavilion with repeated shingle panels.
+OBJECTIVE:
+Use AI assistance to develop a Grasshopper Python script that generates a curved pavilion covered with repeated shingle panels.
 
 PLAN:
 
-1. Start by defining the design goal.
-   The project will generate a pavilion using parameters instead of manual modeling.
+1. Define the design goal.
+   The project will generate a curved vertical pavilion surface covered with repeated shingles.
 
 2. Write detailed pseudo-code.
-   The pseudo-code explains the logic before writing the real code.
+   The pseudo-code explains the computational logic before writing the actual code.
 
-3. Define the main input parameters.
-   These parameters control the pavilion span, height, length, shingle size, row count, column count, row offset, and support height.
+3. Identify the main input parameters.
+   The inputs include pavilion size, curvature, grid density, shingle size, overlap, tilt angle, support height, and base dimensions.
 
-4. Create a base arc.
-   The pavilion starts from three points: left point, top point, and right point.
+4. Create the global pavilion surface.
+   The pavilion surface is generated using a mathematical function. Width controls the horizontal direction, height controls the vertical direction, and depth plus curvature create the bending effect.
 
-5. Generate the pavilion surface.
-   The arc is extruded in one direction to create a curved roof surface.
+5. Divide the surface into a grid.
+   The grid creates placement positions for the shingles.
 
-6. Divide the surface into a grid.
-   The grid creates points where shingles will be placed.
+6. Create local frames.
+   At every grid point, the script calculates local directions and a surface normal. These are used to orient the shingles.
 
-7. Apply a staggered row logic.
-   Every second row is offset to create a shingle pattern.
+7. Generate the fish-scale pattern.
+   Every second row is shifted horizontally to create a staggered shingle pattern.
 
-8. Create repeated shingle panels.
-   A rectangle is created at every grid point.
+8. Create the shingle geometry.
+   Each shingle is created as a panel and placed on the local surface frame.
 
-9. Add support height.
-   The shingles are lifted slightly above the base surface.
+9. Add tilt and depth.
+   The shingles are tilted outward to create shadow and depth, similar to architectural shingle facade references.
 
-10. Organize the code in Visual Studio Code.
-    The code will be saved in a Python file called main.py.
+10. Add supports and structure.
+    The project includes support spacers, vertical ribs, horizontal purlins, side frames, and a base platform.
 
-11. Save all project files.
-    The repository will include pseudo_code.txt, ai_plan.txt, main.py, README.md, and requirements.txt.
+11. Test the script in Grasshopper.
+    Sliders are connected to the Python inputs. The outputs are previewed in Rhino.
 
-12. Push the project to GitHub.
-    GitHub Desktop will be used to create a repository, commit the files, and publish the project online.
+12. Organize the project files.
+    The repository includes README.md, pseudo_code.txt, ai_plan.txt, main.py, and requirements.txt.
+
+13. Use GitHub Desktop.
+    The project folder is committed and pushed to GitHub.
+
+14. Share the repository.
+    The final repository link is submitted as proof of the computational workflow.

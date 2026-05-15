@@ -1,1 +1,2 @@
 No external libraries required.
+The script runs inside Rhino Grasshopper using Rhino.Geometry.
